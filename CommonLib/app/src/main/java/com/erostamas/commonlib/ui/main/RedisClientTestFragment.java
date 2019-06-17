@@ -19,17 +19,16 @@ import com.erostamas.common.*;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class UdpInterfaceTestFragment extends Fragment implements View.OnClickListener {
+public class RedisClientTestFragment extends Fragment implements View.OnClickListener {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
     private PageViewModel pageViewModel;
-    private EditText ipAddressText;
-    private EditText portText;
-    private EditText messageText;
+    private View _rootView;
+    private TextView _resultTextView;
 
-    public static UdpInterfaceTestFragment newInstance(int index) {
-        UdpInterfaceTestFragment fragment = new UdpInterfaceTestFragment();
+    public static RedisClientTestFragment newInstance(int index) {
+        RedisClientTestFragment fragment = new RedisClientTestFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(ARG_SECTION_NUMBER, index);
         fragment.setArguments(bundle);
@@ -51,7 +50,7 @@ public class UdpInterfaceTestFragment extends Fragment implements View.OnClickLi
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_udp, container, false);
+        View root = inflater.inflate(R.layout.fragment_redis, container, false);
         final TextView textView = root.findViewById(R.id.section_label);
         pageViewModel.getText().observe(this, new Observer<String>() {
             @Override
@@ -59,21 +58,17 @@ public class UdpInterfaceTestFragment extends Fragment implements View.OnClickLi
                 textView.setText(s);
             }
         });
-        ipAddressText = (EditText)root.findViewById(R.id.ip_address);
-        portText = (EditText)root.findViewById(R.id.port);
-        messageText = (EditText)root.findViewById(R.id.message);
-        Button button= (Button)root.findViewById(R.id.sendbutton);
+
+        _resultTextView = (TextView)root.findViewById(R.id.redis_result);
+        Button button= (Button)root.findViewById(R.id.refreshbutton);
         button.setOnClickListener(this);
+        _rootView = root;
         return root;
     }
 
     @Override
     public void onClick(View v) {
-        String ipAddress = ipAddressText.getText().toString();
-        int port = Integer.parseInt(portText.getText().toString());
-        String message = messageText.getText().toString();
-        UdpInterface udpInterface = new UdpInterface(ipAddress, port);
-
-        udpInterface.send(message);
+        RedisClient redis = new RedisClient("192.168.1.247", "ledcontrol_process_data", _resultTextView);
+        redis.execute();
     }
 }

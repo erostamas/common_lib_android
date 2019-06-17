@@ -6,6 +6,7 @@ import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.Log;
 
 import com.erostamas.commonlib.R;
 
@@ -28,7 +29,13 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         // getItem is called to instantiate the fragment for the given page.
         // Return a UdpInterfaceTestFragment (defined as a static inner class below).
-        return UdpInterfaceTestFragment.newInstance(position + 1);
+        Log.i("fragments", "position is:" + position);
+        if (position == 0) {
+            return UdpInterfaceTestFragment.newInstance(position + 1);
+        } else if (position == 1) {
+            return RedisClientTestFragment.newInstance(position + 1);
+        }
+        return null;
     }
 
     @Nullable
