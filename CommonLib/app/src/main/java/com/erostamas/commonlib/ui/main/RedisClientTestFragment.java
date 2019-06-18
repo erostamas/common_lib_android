@@ -1,11 +1,13 @@
 package com.erostamas.commonlib.ui.main;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.support.annotation.Nullable;
 import android.support.annotation.NonNull;
@@ -16,16 +18,23 @@ import android.arch.lifecycle.ViewModelProviders;
 import com.erostamas.commonlib.R;
 import com.erostamas.common.*;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * A placeholder fragment containing a simple view.
  */
-public class RedisClientTestFragment extends Fragment implements View.OnClickListener {
+public class RedisClientTestFragment extends Fragment {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
     private PageViewModel pageViewModel;
-    private View _rootView;
-    private TextView _resultTextView;
+    private Map<String, String> _redisContent = new HashMap<String, String>() {{}};
+    private EditText ipAddressText;
+    private EditText mapNameText;
+    private StringMapListAdapter _redisDataListAdapter = new StringMapListAdapter(_redisContent);
 
     public static RedisClientTestFragment newInstance(int index) {
         RedisClientTestFragment fragment = new RedisClientTestFragment();
@@ -58,17 +67,25 @@ public class RedisClientTestFragment extends Fragment implements View.OnClickLis
                 textView.setText(s);
             }
         });
+        ipAddressText = (EditText)root.findViewById(R.id.ip_address);
+        mapNameText = (EditText)root.findViewById(R.id.map_name);
 
-        _resultTextView = (TextView)root.findViewById(R.id.redis_result);
-        Button button= (Button)root.findViewById(R.id.refreshbutton);
-        button.setOnClickListener(this);
-        _rootView = root;
+        ListView redisDataList = (ListView) root.findViewById(R.id.redis_data_list);
+        redisDataList.setAdapter(_redisDataListAdapter);
+
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new RedisClient(ipAddressText.getText().toString(), mapNameText.getText().toString(), _redisContent).execute();
+                        _redisDataListAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }, 0, 2000);//put here time 1000 milliseconds=1 second
         return root;
     }
 
-    @Override
-    public void onClick(View v) {
-        RedisClient redis = new RedisClient("192.168.1.247", "ledcontrol_process_data", _resultTextView);
-        redis.execute();
-    }
 }
